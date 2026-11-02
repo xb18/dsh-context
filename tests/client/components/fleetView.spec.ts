@@ -35,11 +35,14 @@ describe('FleetView — the agent family on its own page', () => {
     const View = makeView(ctx)
     const m = await mount(h(View, { sessionId: 'sv-fleet', useProjection: projectionsFor(richTimeline({ timing: TIMING })) }))
 
-    assert.ok(text(query(m.container, '.lc-agents')).includes('Agent Network'))
-    const self = query(m.container, '.lc-agent-card.lc-agent-self')
+    assert.ok(text(query(m.container, '.lc-atlas-graph')).includes('Relation canvas'))
+    const self = query(m.container, '[data-agent="sv-fleet"]')
     assert.ok(text(self).includes('Main Agent'))
-    assert.equal(query(self, '.lc-agent-meta-text').textContent, '6m27s · 3 steps')
-    assert.ok(text(query(m.container, '.lc-foot')).startsWith(DICT_EN['footer'].slice(0, 24)))
+    assert.ok(text(query(m.container, '.lc-atlas-detail')).includes('6m27s'))
+    assert.ok(text(query(m.container, '.lc-atlas-detail')).includes('3'))
+    assert.ok(!text(m.container).includes('tokens in context'))
+    assert.ok(!text(m.container).includes('est.'))
+    assert.equal(text(query(m.container, '.lc-foot')), DICT_EN['fleet.atlas.note'])
     await m.unmount()
     ctx.dispose()
 
@@ -55,7 +58,7 @@ describe('FleetView — the agent family on its own page', () => {
         detailRev: 6,
       })),
     }))
-    assert.equal(query(query(slim.container, '.lc-agent-card.lc-agent-self'), '.lc-agent-meta-text').textContent, '3 steps', 'the slim head counts the steps itself')
+    assert.ok(text(query(slim.container, '.lc-atlas-detail')).includes(DICT_EN['fleet.atlas.steps']))
     assert.ok(!text(slim.container).includes(DICT_EN['detail.loading']), 'no waiting state once the head is served')
     await slim.unmount()
     slimCtx.dispose()
@@ -100,8 +103,8 @@ describe('FleetView — the agent family on its own page', () => {
     const View = makeView(ctx)
     const m = await mount(h(View, { useProjection: projectionsFor(timeline()) }))
 
-    assert.equal(queryAll(m.container, '.lc-agents').length, 0)
-    assert.ok(text(query(m.container, '.lc-foot')).startsWith(DICT_EN['footer'].slice(0, 24)))
+    assert.equal(queryAll(m.container, '.lc-atlas-graph').length, 0)
+    assert.equal(text(query(m.container, '.lc-foot')), DICT_EN['fleet.atlas.note'])
     await m.unmount()
     ctx.dispose()
   })
@@ -118,7 +121,7 @@ describe('FleetView — the agent family on its own page', () => {
     const View = makeView(ctx)
     const m = await mount(h(View, { sessionId: id, useProjection: projectionsFor(richTimeline({ timing: TIMING })) }))
     await act(async () => { requestFleetMemberFocus(id, 'worker') })
-    await until(() => query(m.container, '[data-agent="worker"]').classList.contains('lc-agent-hover'), 'the relay never lit the member')
+    await until(() => query(m.container, '[data-agent="worker"]').classList.contains('lc-atlas-node-hover'), 'the relay never lit the member')
     assert.equal(currentFleetMemberFocus(id), 'worker', 'the resting pick is shared')
     await m.unmount()
     ctx.dispose()
